@@ -1,0 +1,134 @@
+// Author: Kevin Farkas (5.Mai 2021)
+// 
+// content: 
+// - proto-file for a test of communication over grpc 
+//   between two docker containers 
+//
+// generate files:
+// - python3 -m grpc_tools.protoc -I../../protos --python_out=. --grpc_python_out=. ../../protos/communication.proto
+//
+// location of generated files
+// - /grpc/python/communication/generated_protobuf_files/
+
+/****************************************************************************
+** protobuf version: 3
+** packagename: communication
+*****************************************************************************/
+
+syntax = "proto3";
+
+package communication;
+
+/****************************************************************************
+** Message definition:
+*****************************************************************************/
+
+// Client messages (requests)
+message RequestEmpty {
+  int64 client_id = 1;
+}
+
+message RequestDoAction {
+  int64 client_id = 1;
+  float joint_1 = 2;
+  float joint_2 = 3;
+  float joint_3 = 4;
+  float joint_4 = 5;
+  float joint_5 = 6;
+  float joint_6 = 7;
+}
+
+
+// Server messages (responses)
+message ResponseEmpty {
+  int64 server_id = 1;
+}
+
+message ResponseBinaryStatus {
+  int64 server_id = 1;
+  bool status = 2;
+}
+
+message ResponseDistance {
+  int64 server_id = 1;
+  float distance = 2;
+}
+
+message ResponseCylinderPos {
+  int64 server_id = 1;
+  float pos_x = 2;
+  float pos_y = 3;
+  float pos_z = 4;
+}
+
+message ResponseRobotJointStates {
+  int64 server_id = 1;
+  float state_joint_1 = 2;
+  float state_joint_2 = 3;
+  float state_joint_3 = 4;
+  float state_joint_4 = 5;
+  float state_joint_5 = 6;
+  float state_joint_6 = 7;
+}
+
+message ResponseRobotPosition {
+  int64 server_id = 1;
+  float joint_1_x = 2;
+  float joint_1_y = 3;
+  float joint_1_z = 4;
+  float joint_3_x = 5;
+  float joint_3_y = 6;
+  float joint_3_z = 7;
+  float joint_5_x = 8;
+  float joint_5_y = 9;
+  float joint_5_z = 10;
+  float ee_x = 11;
+  float ee_y = 12;
+  float ee_z = 13;
+}
+
+message ResponseCameraImage {
+  int64 server_id = 1;
+  string b64image = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+
+
+/****************************************************************************
+** Service definition:
+** - notation:
+**   rpc <service-name> (<client-request-ms>) returns (<server-response-msg>)
+**
+** - mode: 
+**   - unary-unary             -> void, void
+**   - client-streaming        -> stream, void
+**   - server-streaming        -> void, stream
+**   - bidirectional streaming -> stream, stream
+*****************************************************************************/
+service GRPCServer{  
+  // experiment
+  rpc Test (RequestEmpty) returns (ResponseEmpty);
+  rpc Setup (RequestEmpty) returns (ResponseCylinderPos); 
+  rpc Execute (RequestDoAction) returns (ResponseDistance);
+  rpc DistanceRobotCylinder (RequestEmpty) returns (ResponseDistance);
+  
+  // robot
+  rpc RobotReset (RequestEmpty) returns (ResponseEmpty);
+  rpc GetRobotJointStates (RequestEmpty) returns (ResponseRobotJointStates);
+  //rpc GetRobotCurrentFrame (RequestImage) returns stream ()
+  rpc GetRobotPosition (RequestEmpty) returns (ResponseRobotPosition);
+  rpc RobotAct (RequestDoAction) returns (ResponseEmpty);
+  rpc RobotIsStable (RequestEmpty) returns (ResponseBinaryStatus);
+  rpc RobotCheckCollision (RequestEmpty) returns (ResponseBinaryStatus);
+  
+  // cylinder
+  rpc CylinderReset (RequestEmpty) returns (ResponseEmpty);
+  rpc CylinderRandomReset (RequestEmpty) returns (ResponseEmpty);
+  rpc CylinderGetPosition (RequestEmpty) returns (ResponseCylinderPos);
+  rpc CylinderIsStable (RequestEmpty) returns (ResponseBinaryStatus);
+  rpc CylinderIsOnGround (RequestEmpty) returns (ResponseBinaryStatus);
+  
+  // camera
+  rpc CameraGetImage (RequestEmpty) returns (ResponseCameraImage);
+}

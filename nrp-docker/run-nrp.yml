@@ -1,0 +1,101 @@
+version: '3'
+
+services:
+    frontend:
+        image: hbpneurorobotics/nrp_frontend:3.1
+        container_name: nrp_frontend
+        environment:
+            HBP: /home/bbpnrsoa/nrp/src
+            NRP_USER: bbpnrsoa
+            NRP_SOURCE_DIR: /home/bbpnrsoa/nrp/src
+            EXTERNAL_FRONTEND_IP: 172.17.0.1
+        ports:
+            - "9000:9000"
+        volumes:
+            - nrp_storage:/home/bbpnrsoa/.opt/nrpStorage
+            - nrp_models:/home/bbpnrsoa/nrp/src/Models
+            - nrp_experiments:/home/bbpnrsoa/nrp/src/Experiments
+            - ${TUM_NRP_DIR}:/tum_nrp
+        restart: always
+        command: bash /tum_nrp/nrp-docker/deploy/setup/setup_frontend.sh
+        tty: true
+
+    backend1:
+        image: hbpneurorobotics/nrp:3.1
+
+        environment:
+            NRP_INSTALL_DIR: /home/bbpnrsoa/.local
+            NRP_SOURCE_DIR: /home/bbpnrsoa/nrp/src
+            NRP_ROS_VERSION: noetic
+            NRP_MODELS_DIRECTORY: /home/bbpnrsoa/nrp/src/Models
+            HBP: /home/bbpnrsoa/nrp/src
+            EXTERNAL_FRONTEND_IP: 172.17.0.1
+
+        volumes:
+            - nrp_storage:/home/bbpnrsoa/.opt/nrpStorage
+            - nrp_models:/home/bbpnrsoa/nrp/src/Models
+            - nrp_experiments:/home/bbpnrsoa/nrp/src/Experiments
+            - ${TUM_NRP_DIR}:/tum_nrp
+        ports:
+            - "8080:8080"
+            - "50051:50051"
+
+        restart: always
+
+        command: bash /tum_nrp/nrp-docker/deploy/setup/setup_backend.sh
+        tty: true
+    
+    backend2:
+        image: hbpneurorobotics/nrp:3.1
+
+        environment:
+            NRP_INSTALL_DIR: /home/bbpnrsoa/.local
+            NRP_SOURCE_DIR: /home/bbpnrsoa/nrp/src
+            NRP_ROS_VERSION: noetic
+            NRP_MODELS_DIRECTORY: /home/bbpnrsoa/nrp/src/Models
+            HBP: /home/bbpnrsoa/nrp/src
+            EXTERNAL_FRONTEND_IP: 172.17.0.1
+
+        volumes:
+            - nrp_storage:/home/bbpnrsoa/.opt/nrpStorage
+            - nrp_models:/home/bbpnrsoa/nrp/src/Models
+            - nrp_experiments:/home/bbpnrsoa/nrp/src/Experiments
+            - ${TUM_NRP_DIR}:/tum_nrp
+        ports:
+            - "8081:8080"
+
+        restart: always
+
+        command: bash /tum_nrp/nrp-docker/deploy/setup/setup_backend.sh
+        tty: true
+
+    rl:
+        # container_name: rl
+        build: 
+          context: ./docker_rl_workdir
+          dockerfile: Dockerfile
+
+        # environments:
+        #     EXTERNAL_FRONTEND_IP: 172.17.0.1
+        ports:
+            - "6000:6000"
+            - "8888:8888" # jupyter notebook port
+            - "6006:6006" # tensorboard port
+
+        volumes:
+            - ${TUM_NRP_DIR}/rlmodel:/tum_nrp/rlmodel
+            - ${TUM_NRP_DIR}/experiment:/tum_nrp/experiment
+            - ${TUM_NRP_DIR}/grpc:/tum_nrp/grpc
+        
+        restart: always
+
+        tty: true
+
+volumes:
+    nrp_storage:
+        external: true
+    nrp_models:
+        external: true
+    nrp_experiments:
+        external: true
+

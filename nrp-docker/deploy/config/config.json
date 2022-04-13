@@ -1,0 +1,48 @@
+{
+  "refreshInterval": 5000,
+  "auth": {
+    "renewInternal": 600000,
+    "clientId": "0dcfb392-32c7-480c-ae18-cbaf29e8a6b1",
+    "clientSecret": "<client_oidc_secret>",
+    "url": "https://services.humanbrainproject.eu/oidc",
+    "deactivate": true
+  },
+  "port": 8443,
+  "modelsPath": "$HBP/Models",
+  "experimentsPath": "$HBP/Experiments",
+  "servers": {
+    "nrp_backend_1": {
+      "gzweb": {
+        "assets": "http://172.17.0.1:8080/assets",
+        "nrp-services": "http://172.17.0.1:8080",
+        "videoStreaming": "http://172.17.0.1:8080/webstream/",
+        "websocket": "ws://172.17.0.1:8080/gzbridge"
+      },
+      "rosbridge": {
+        "websocket": "ws://172.17.0.1:8080/rosbridge"
+      },
+      "serverJobLocation": "local"
+    },
+    "nrp_backend_2": {
+      "gzweb": {
+        "assets": "http://172.17.0.1:8081/assets",
+        "nrp-services": "http://172.17.0.1:8081",
+        "videoStreaming": "http://172.17.0.1:8081/webstream/",
+        "websocket": "ws://172.17.0.1:8081/gzbridge"
+      },
+      "rosbridge": {
+        "websocket": "ws://172.17.0.1:8081/rosbridge"
+      },
+      "serverJobLocation": "local"
+    }
+  },
+  "storage": "FS",
+  "authentication": "FS",
+  "backendScripts": {
+    "restart-backend":
+      "$HBP/user-scripts/config_files/nrpBackendProxy/restart-backend.sh"
+  },
+  "activity-logs": {
+    "localfile": "/tmp/nrp_activity.log"
+  }
+}
